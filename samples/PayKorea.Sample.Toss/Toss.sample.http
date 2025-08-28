@@ -1,0 +1,25 @@
+### Toss Confirm
+POST https://localhost:5001/toss/confirm
+Content-Type: application/json
+
+{
+  "paymentKey": "pay_aaaaaaaaaaaaaaaa",
+  "orderId": "ORD-001",
+  "amount": 1000
+}
+
+### Toss Cancel
+POST https://localhost:5001/toss/cancel
+Content-Type: application/json
+
+{
+  "paymentKey": "pay_aaaaaaaaaaaaaaaa",
+  "cancelReason": "user request",
+  "cancelAmount": 1000
+}
+
+### Toss Redirect Success (server confirm)
+GET https://localhost:5001/toss/success?paymentKey=pay_aaaaaaaaaaaaaaaa&orderId=ORD-001&amount=1000
+
+### Toss Redirect Fail
+GET https://localhost:5001/toss/fail?code=USER_CANCEL&message=User%20canceled&orderId=ORD-001

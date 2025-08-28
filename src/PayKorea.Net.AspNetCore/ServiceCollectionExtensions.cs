@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using PayKorea.Net.Toss;
 
 namespace PayKorea.Net.AspNetCore;
 
@@ -27,6 +28,25 @@ public static class ServiceCollectionExtensions
 		});
 
 		services.TryAddSingleton<PayKoreaClient>();
+		return services;
+	}
+
+	public static IServiceCollection AddTossPayments(this IServiceCollection services, IConfiguration configuration)
+	{
+		var section = configuration.GetSection("TossPayments");
+		services.AddOptions<TossPaymentsOptions>()
+			.Bind(section)
+			.Validate(o => !string.IsNullOrWhiteSpace(o.SecretKey), "SecretKey is required")
+			.ValidateOnStart();
+
+		services.AddHttpClient<TossPaymentsClient>()
+			.AddTypedClient((http, sp) =>
+			{
+				var opts = sp.GetRequiredService<IOptions<TossPaymentsOptions>>().Value;
+				return new TossPaymentsClient(http, opts);
+			});
+
+		services.TryAddTransient<TossPaymentProvider>();
 		return services;
 	}
 }

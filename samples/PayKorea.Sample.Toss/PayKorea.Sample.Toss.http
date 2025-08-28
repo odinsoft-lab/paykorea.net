@@ -1,0 +1,5 @@
+### Swagger
+GET https://localhost:5001/swagger/index.html
+
+### Health (no-op)
+GET https://localhost:5001/

@@ -23,4 +23,4 @@
 ## 4. 샘플 고도화
 - [ ] appsettings.json 예시 추가 (PayKorea 섹션)
 - [ ] Swagger 예시 스키마/설명 정리
-- [ ] 예제 요청/응답 파일(HTTP 파일) 추가
+- [x] 예제 요청/응답 파일(HTTP 파일) 추가 (Toss)

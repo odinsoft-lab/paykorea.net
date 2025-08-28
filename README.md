@@ -4,9 +4,9 @@
 
 ## Monorepo 구조
 - src/PayKorea.Net: 코어 SDK (DTO, IPaymentProvider, Mock, PayKoreaClient)
-- src/PayKorea.Net.AspNetCore: ASP.NET Core DI 확장(AddPayKorea, PayKoreaOptions)
-- src/PayKorea.Sample: 샘플 Minimal API (Authorize/Webhook/ApplePay 스텁)
-- tests/PayKorea.Net.Tests: 코어 SDK 단위 테스트
+- src/PayKorea.Net.AspNetCore: ASP.NET Core DI 확장(AddPayKorea, PayKoreaOptions, AddTossPayments)
+- samples/PayKorea.Sample.Toss: Toss 전용 샘플 Minimal API (Confirm/Cancel, Redirect success/fail)
+- tests/PayKorea.Tests.Toss: Toss 전용 단위 테스트
 
 ## 요구 사항
 - .NET SDK 8 / 9
@@ -21,43 +21,36 @@ dotnet build .\paykorea.net.sln -c Debug
 dotnet test .\paykorea.net.sln -c Debug
 ```
 
-## 샘플 실행 (PayKorea.Sample)
-샘플 앱은 Mock Provider를 통해 승인 흐름을 시연합니다.
+## 샘플 실행 (Toss 전용)
+Toss Confirm/Cancel 및 Redirect 핸들러를 확인할 수 있습니다.
 
-1) 앱 실행
-
-```pwsh
-dotnet run --project .\samples\PayKorea.Sample\PayKorea.Sample.csproj
-```
-
-2) Swagger UI 열기
-- http://localhost:5000/swagger 또는 콘솔에 표시된 실제 URL
-
-3) 엔드포인트
-- POST `/payments/authorize`
-	- Body 예시
-		```json
-		{
-			"orderId": "ORD-001",
-			"amount": 1000,
-			"currency": "KRW",
-			"description": "테스트 결제",
-			"customerEmail": "buyer@example.com"
-		}
-		```
-- POST `/webhooks/pg` (서명 검증/멱등키 처리 TODO)
-- POST `/apple-pay/merchant-validation` (501 Not Implemented 템플릿)
-
-## 앱 설정(AppSettings)
-`PayKorea.Net.AspNetCore`는 `PayKorea` 섹션을 바인딩합니다.
-
+1) 설정: `samples/PayKorea.Sample.Toss/appsettings.json`
 ```json
 {
-	"PayKorea": {
-		"Provider": "Mock"
+	"TossPayments": {
+	"SecretKey": "test_sk_replace_me",
+	"ClientKey": "test_ck_replace_me",
+	"BaseUrl": "https://api.tosspayments.com"
 	}
 }
 ```
+
+2) 실행
+```pwsh
+dotnet run --project .\samples\PayKorea.Sample.Toss\PayKorea.Sample.Toss.csproj
+```
+
+3) Swagger UI
+- https://localhost:5001/swagger (개발 환경 기본)
+
+4) HTTP 예제 파일
+- `samples/PayKorea.Sample.Toss/Toss.sample.http`
+
+5) 샌드박스 데모 페이지(위젯)
+- https://localhost:5001/ 로 접속 후 “결제하기” 클릭 → Toss 결제창 → 성공시 서버에서 /toss/success에서 Confirm 수행
+
+## 앱 설정(AppSettings)
+`PayKorea.Net.AspNetCore`는 `PayKorea` 섹션(코어)과 `TossPayments` 섹션(토스)을 바인딩합니다.
 
 ## SDK 사용 방법
 DI를 사용하는 ASP.NET Core 예:

@@ -227,3 +227,57 @@
 - [브랜드페이 자동결제](https://docs.tosspayments.com/reference/brandpay-billing.md): 브랜드페이에서 제공하는 자동결제 SDK 와 API 엔드포인트(Endpoint)의 객체 정보, 파라미터, 요청 및 응답 예제를 살펴보세요.
 - [브랜드페이 API](https://docs.tosspayments.com/reference/brandpay.md): 브랜드페이에서 제공하는 API 엔드포인트(Endpoint)와 객체 정보, 파라미터, 요청 및 응답 예제를 살펴보세요.
 - [API 에러 코드](https://docs.tosspayments.com/reference/error-codes.md): 토스페이먼츠 API 사용할 때 발생할 수 있는 에러를 살펴보세요.
+
+---
+
+## C# Integration Guide (SDK-only / .NET 8)
+
+이 섹션은 본 레포의 `PayKorea.Net.Toss` 기반 서버 연동 흐름을 요약합니다.
+
+### 구성 요소
+- TossPaymentsOptions: SecretKey, BaseUrl, TestCode(선택)
+- TossPaymentsClient: Confirm/Cancel API 클라이언트
+- 샘플 엔드포인트: `/toss/confirm`, `/toss/cancel`
+
+### 설정(appsettings.json)
+```json
+{
+	"TossPayments": {
+		"SecretKey": "test_sk_xxx",
+		"BaseUrl": "https://api.tosspayments.com"
+	}
+}
+```
+
+### DI 등록(Program.cs)
+```csharp
+using PayKorea.Net.AspNetCore;
+using PayKorea.Net.Toss;
+
+builder.Services.AddTossPayments(builder.Configuration);
+```
+
+### Confirm
+프런트에서 받은 paymentKey를 서버에 전달한 뒤 confirm으로 확정합니다.
+```csharp
+app.MapPost("/toss/confirm", async (TossPaymentsClient toss, TossConfirmDto dto, CancellationToken ct) =>
+{
+		var res = await toss.ConfirmAsync(new TossConfirmRequest(dto.paymentKey, dto.orderId, dto.amount), ct);
+		return Results.Ok(res);
+});
+```
+
+### Cancel
+```csharp
+app.MapPost("/toss/cancel", async (TossPaymentsClient toss, TossCancelDto dto, CancellationToken ct) =>
+{
+		var res = await toss.CancelAsync(dto.paymentKey, new TossCancelRequest(dto.cancelReason, dto.cancelAmount), ct);
+		return Results.Ok(res);
+});
+```
+
+### 에러 재현(TestCode)
+테스트 환경에서 옵션 `TestCode`를 지정하면 요청 헤더 `TossPayments-Test-Code`가 자동 추가됩니다.
+
+### 보안
+SecretKey는 서버에서만 사용하고 안전한 저장소(환경변수/Secret Manager/Key Vault 등)로 관리하세요.
