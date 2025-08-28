@@ -1,0 +1,6 @@
+@PayKorea.Sample_HostAddress = http://localhost:5095
+
+GET {{PayKorea.Sample_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
